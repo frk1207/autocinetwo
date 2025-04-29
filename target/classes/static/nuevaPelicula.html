@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ingresar Nueva Película</title>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: #f4f4f4;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            width: 400px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            color: #555;
+            font-weight: bold;
+        }
+
+        input[type="text"],
+        input[type="number"],
+        select,
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        button {
+            background-color: #007bff;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            width: 100%;
+            display: block;
+            margin-top: 20px;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        .mensaje {
+            margin-top: 20px;
+            text-align: center;
+            font-weight: bold;
+            border-radius: 4px;
+            padding: 10px;
+        }
+
+        .mensaje-exito {
+            background-color: #d4edda;
+            color: #155724;
+            border: 1px solid #c3e6cb;
+        }
+
+        .mensaje-error {
+            background-color: #f8d7da;
+            color: #721c24;
+            border: 1px solid #f5c6cb;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Ingresar Nueva Película</h2>
+        <form id="nuevaPeliculaForm">
+            <div class="form-group">
+                <label for="nombre">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" required>
+            </div>
+
+            <div class="form-group">
+                <label for="duracion">Duración (minutos):</label>
+                <input type="number" id="duracion" name="duracion" min="1" required>
+            </div>
+
+            <div class="form-group">
+                <label for="clasificacion">Clasificación:</label>
+                <input type="text" id="clasificacion" name="clasificacion">
+            </div>
+
+            <div class="form-group">
+                <label for="idioma">Idioma Original:</label>
+                <input type="text" id="idioma" name="idioma">
+            </div>
+
+            <div class="form-group">
+                <label for="genero">Género:</label>
+                <input type="text" id="genero" name="genero">
+            </div>
+
+            <div class="form-group">
+                <label for="formato">Formato:</label>
+                <select id="formato" name="formato">
+                    <option value="2D">2D</option>
+                    <option value="3D">3D</option>
+                    <option value="IMAX">IMAX</option>
+                    <option value="4DX">4DX</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="sinopsis">Sinopsis:</label>
+                <textarea id="sinopsis" name="sinopsis"></textarea>
+            </div>
+
+            <button type="submit">Guardar Película</button>
+        </form>
+        <div id="mensaje" class="mensaje" style="display: none;"></div>
+    </div>
+
+    <script>
+        const form = document.getElementById('nuevaPeliculaForm');
+        const mensajeDiv = document.getElementById('mensaje');
+
+        form.addEventListener('submit', (event) => {
+            event.preventDefault(); // Evita el envío tradicional del formulario
+            // Obtener los datos del formulario
+            const formData = new FormData(form);
+            const pelicula = {
+                titulo: formData.get('nombre'),
+                duracion: parseInt(formData.get('duracion')), // Asegurar que la duración sea un número
+                clasificacion: formData.get('clasificacion'),
+                idioma: formData.get('idioma'),
+                genero: formData.get('genero'),
+                formato: formData.get('formato'),
+                sinopsis: formData.get('sinopsis'),
+            };
+            console.log(pelicula);
+
+            // Convertir los datos a JSON
+            const jsonData = JSON.stringify(pelicula);
+
+            // Enviar los datos a la API usando fetch
+            fetch('/api/peliculas', { // Reemplaza con la URL de tu API
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', // Indicar que enviamos JSON
+                },
+                body: jsonData, // Enviar los datos JSON en el cuerpo de la petición
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`Error al guardar la película: ${response.status} - ${response.statusText}`);
+                }
+                console.log("error then fetch");
+                return response.json(); // Si la respuesta es exitosa, convertirla a JSON
+            })
+            .then(data => {
+                // Mostrar mensaje de éxito
+                mensajeDiv.textContent = 'Película guardada exitosamente.';
+                mensajeDiv.className = 'mensaje mensaje-exito';
+                mensajeDiv.style.display = 'block';
+
+                // Limpiar el formulario (opcional)
+                form.reset();
+
+                // Ocultar el mensaje después de unos segundos
+                setTimeout(() => {
+                    mensajeDiv.style.display = 'none';
+                }, 3000); // Ocultar después de 3 segundos (3000 ms)
+
+            })
+            .catch(error => {
+                // Manejar errores
+                console.error('Error:', error);
+                mensajeDiv.textContent = `Error al guardar la película: ${error.message}`;
+                mensajeDiv.className = 'mensaje mensaje-error';
+                mensajeDiv.style.display = 'block';
+                setTimeout(() => {
+                    mensajeDiv.style.display = 'none';
+                }, 5000);
+            });
+        });
+    </script>
+</body>
+</html>

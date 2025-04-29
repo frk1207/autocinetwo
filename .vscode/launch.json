@@ -1,0 +1,14 @@
+{
+    "configurations": [
+        {
+            "type": "java",
+            "name": "Spring Boot-AutocinetwoApplication<autocinetwo>",
+            "request": "launch",
+            "cwd": "${workspaceFolder}",
+            "mainClass": "com.autocinetwo.autocinetwo.AutocinetwoApplication",
+            "projectName": "autocinetwo",
+            "args": "",
+            "envFile": "${workspaceFolder}/.env"
+        }
+    ]
+}

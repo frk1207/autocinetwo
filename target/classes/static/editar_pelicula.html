@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Editar Película</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="container bg-white rounded-lg shadow-md p-8">
+        <h1 class="text-3xl font-semibold text-blue-700 text-center mb-6">Editar Película</h1>
+        <form id="editMovieForm" class="space-y-4">
+            <div>
+                <label for="nombre" class="block text-gray-700 text-sm font-bold mb-2">Nombre:</label>
+                <input type="text" id="nombre" name="nombre" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div>
+                <label for="duracion" class="block text-gray-700 text-sm font-bold mb-2">Duración (minutos):</label>
+                <input type="number" id="duracion" name="duracion" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div>
+                <label for="genero" class="block text-gray-700 text-sm font-bold mb-2">Género:</label>
+                <input type="text" id="genero" name="genero" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div>
+                <label for="clasificacion" class="block text-gray-700 text-sm font-bold mb-2">Clasificación:</label>
+                <input type="text" id="clasificacion" name="clasificacion" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+             <div>
+                <label for="idioma" class="block text-gray-700 text-sm font-bold mb-2">Idioma:</label>
+                <input type="text" id="idioma" name="idioma" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+            </div>
+            <div>
+                <label for="formato" class="block text-gray-700 text-sm font-bold mb-2">Formato:</label>
+                 <select id="formato" name="formato" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline">
+                    <option value="2D">2D</option>
+                    <option value="3D">3D</option>
+                    <option value="IMAX">IMAX</option>
+                    <option value="4DX">4DX</option>
+                    <option value="Otro">Otro</option>
+                </select>
+            </div>
+            <div>
+                <label for="sinopsis" class="block text-gray-700 text-sm font-bold mb-2">Sinopsis:</label>
+                <textarea id="sinopsis" name="sinopsis" class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"></textarea>
+            </div>
+            <button type="submit" class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline">
+                Guardar Cambios
+            </button>
+        </form>
+    </div>
+
+    <script>
+        const form = document.getElementById('editMovieForm');
+        const nombreInput = document.getElementById('nombre');
+        const duracionInput = document.getElementById('duracion');
+        const generoInput = document.getElementById('genero');
+        const clasificacionInput = document.getElementById('clasificacion');
+        const idiomaInput = document.getElementById('idioma');
+        const formatoInput = document.getElementById('formato');
+        const sinopsisInput = document.getElementById('sinopsis');
+
+
+        // Obtener el ID de la película de la URL
+        const urlParams = new URLSearchParams(window.location.search);
+        const movieId = parseInt(urlParams.get('id'));
+
+        // Función para cargar los datos de la película desde la API
+        function fetchMovie(id) {
+            fetch(`/api/peliculas/${id}`)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(movie => {
+                // Llenar el formulario con los datos de la película
+                nombreInput.value = movie.titulo;
+                duracionInput.value = movie.duracion;
+                generoInput.value = movie.genero;
+                clasificacionInput.value = movie.clasificacion;
+                idiomaInput.value = movie.idioma;
+                formatoInput.value = movie.formato;
+                sinopsisInput.value = movie.sinopsis;
+            })
+            .catch(error => {
+                console.error('Error fetching movie:', error);
+                alert('No se pudo cargar la información de la película.');
+            });
+        }
+
+        // Cargar los datos de la película al cargar la página
+        fetchMovie(movieId);
+
+        // Manejar el envío del formulario
+        form.addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            // Obtener los datos del formulario
+            const updatedMovieData = {
+                titulo: nombreInput.value,
+                duracion: parseInt(duracionInput.value),
+                genero: generoInput.value,
+                clasificacion: clasificacionInput.value,
+                idioma: idiomaInput.value,
+                formato: formatoInput.value,
+                sinopsis: sinopsisInput.value
+            };
+            console.log(updatedMovieData);
+            console.log(movieId);
+            // Enviar los datos actualizados a la API
+            fetch(`/api/peliculas/${movieId}`, {
+                method: 'PUT',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(updatedMovieData),
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(updatedMovie => {
+                // Mostrar mensaje de éxito y redirigir a la lista de películas
+                console.log(updatedMovie);
+                alert('Película actualizada exitosamente.');
+                window.location.href = '/peliculasLista.html'; // Redirigir a la lista
+            })
+            .catch(error => {
+                console.error('Error updating movie:', error);
+                alert('Ocurrió un error al actualizar la película.');
+            });
+        });
+    </script>
+</body>
+</html>

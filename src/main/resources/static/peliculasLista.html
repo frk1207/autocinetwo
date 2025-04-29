@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lista de Películas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+            line-height: 1.25rem;
+            border-radius: 0.25rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-100 p-8">
+    <div class="container mx-auto p-8 bg-white rounded-lg shadow-md">
+        <h1 class="text-3xl font-semibold text-blue-700 text-center mb-6">Lista de Películas</h1>
+
+        <table id="movieTable" class="min-w-full table-auto rounded-lg hidden">
+            <thead class="bg-gray-200">
+                <tr>
+                    <th class="px-4 py-2 text-left text-gray-600 font-semibold uppercase">Nombre</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-semibold uppercase">Duración</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-semibold uppercase">Género</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-semibold uppercase">Clasificación</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-semibold uppercase">Idioma</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-semibold uppercase">Formato</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-semibold uppercase">Sinopsis</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-semibold uppercase">Editar</th>
+                    <th class="px-4 py-2 text-left text-gray-600 font-semibold uppercase">Eliminar</th>
+                </tr>
+            </thead>
+            <tbody class="text-gray-700">
+                <tr>
+                    <td colspan="9" class="px-4 py-2 text-center text-gray-500">No hay películas disponibles.</td>
+                </tr>
+            </tbody>
+        </table>
+
+        <div id="noMoviesMessage" class="text-center text-gray-500">
+            No hay películas disponibles.
+        </div>
+    </div>
+
+    <script>
+        const movieTable = document.getElementById("movieTable");
+        const noMoviesMessage = document.getElementById("noMoviesMessage");
+
+        function displayMovies(movies) {
+            if (movies.length === 0) {
+                movieTable.classList.add("hidden");
+                noMoviesMessage.classList.remove("hidden");
+            } else {
+                movieTable.classList.remove("hidden");
+                noMoviesMessage.classList.add("hidden");
+                const movieTableBody = movieTable.querySelector("tbody");
+                movieTableBody.innerHTML = "";
+
+                movies.forEach((movie) => {
+                    const row = movieTableBody.insertRow();
+                    const nameCell = row.insertCell();
+                    const durationCell = row.insertCell();
+                    const genreCell = row.insertCell();
+                    const classificationCell = row.insertCell();
+                    const idiomaCell = row.insertCell();
+                    const formatoCell = row.insertCell();
+                    const synopsisCell = row.insertCell();
+                    const editarCell = row.insertCell();
+                    const eliminarCell = row.insertCell();
+
+                    nameCell.textContent = movie.titulo;
+                    durationCell.textContent = movie.duracion;
+                    genreCell.textContent = movie.genero;
+                    classificationCell.textContent = movie.clasificacion;
+                    idiomaCell.textContent = movie.idioma;
+                    formatoCell.textContent = movie.formato;
+                    synopsisCell.textContent = movie.sinopsis;
+
+                    // Crear botones de "Editar" y "Eliminar"
+                    const editarButton = document.createElement("button");
+                    editarButton.textContent = "Editar";
+                    editarButton.className = "bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded-md shadow-md focus:outline-none focus:shadow-outline btn-sm";
+                    editarButton.addEventListener("click", () => {
+                        // Lógica para editar la película
+                        console.log(`Editar película con ID: ${movie.id_pelicula}`);
+                        // Redirigir a la página de edición (debes crear esta página)
+                        window.location.href = `/editar_pelicula.html?id=${movie.id_pelicula}`; // Ejemplo de URL
+                    });
+                    editarCell.appendChild(editarButton);
+
+                    const eliminarButton = document.createElement("button");
+                    eliminarButton.textContent = "Eliminar";
+                    eliminarButton.className = "bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded-md shadow-md focus:outline-none focus:shadow-outline btn-sm";
+                    eliminarButton.addEventListener("click", () => {
+                        // Lógica para eliminar la película
+                        console.log(movie);
+                        console.log(`Eliminar película con ID: ${movie.id_pelicula}`);
+                        // Aquí deberías llamar a tu API para eliminar la película
+                        fetch(`/api/peliculas/${movie.id_pelicula}`, {  // Corregido el endpoint
+                            method: 'DELETE',
+                        })
+                        .then(response => {
+                            if (response.ok) {
+                                // Si la eliminación es exitosa, recargar la lista de películas
+                                fetchMovies(); // Volver a cargar la lista de películas
+                            } else {
+                                alert('No se pudo eliminar la película.');
+                            }
+                        })
+                        .catch(error => {
+                            console.error('Error al eliminar la película:', error);
+                            alert('Ocurrió un error al eliminar la película.');
+                        });
+                    });
+                    eliminarCell.appendChild(eliminarButton);
+
+                    nameCell.classList.add("px-4", "py-2");
+                    durationCell.classList.add("px-4", "py-2");
+                    genreCell.classList.add("px-4", "py-2");
+                    classificationCell.classList.add("px-4", "py-2");
+                    idiomaCell.classList.add("px-4", "py-2");
+                    formatoCell.classList.add("px-4", "py-2");
+                    synopsisCell.classList.add("px-4", "py-2");
+                    editarCell.classList.add("px-4", "py-2");
+                    eliminarCell.classList.add("px-4", "py-2");
+                });
+            }
+        }
+
+        async function fetchMovies() {
+            try {
+                const response = await fetch("/api/peliculas");
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                const movies = await response.json();
+                displayMovies(movies);
+            } catch (error) {
+                console.error("Error fetching movies:", error);
+                // Aquí podrías mostrar un mensaje de error al usuario en la página
+                alert("No se pudo cargar la lista de películas. Por favor, inténtelo de nuevo más tarde.");
+            }
+        }
+
+        fetchMovies();
+    </script>
+</body>
+</html>
